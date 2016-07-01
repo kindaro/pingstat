@@ -15,9 +15,10 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Lib
-  build-depends:       base >= 4.7 && < 5
+  exposed-modules:     Lib, Grammar.Ping
+  build-depends:       base >= 4.7 && < 5, array
   default-language:    Haskell2010
+  build-tools: alex
 
 executable PingStat-exe
   hs-source-dirs:      app
