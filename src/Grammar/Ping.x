@@ -9,21 +9,25 @@ import Data.List
 
 $pairSym = [=]
 $whitespace = [\n\t\ ]
-$char = [~$whitespace]
+@label = [^$whitespace$pairSym]+
+$numeric = [0-9]
+@numFloat = $numeric+\.$numeric+
+@numInt = $numeric+
 
 tokens :-
     $whitespace+ { const Blank }
-    $char+ {
-            ( \x -> ( maybe (Word x) (Pair . (\(p1,p2) -> (p1, tail p2))) ) $
-              (( findIndex (== '=') x)
-               >>= Just . (flip splitAt) x) )
-        }
+    $pairSym+ { const PairSym }
+    @numFloat { NumFloat . read }
+    @numInt { NumInt . read }
+    @label { Label }
 
 {
 
 data Grammar = Blank
-             | Word String
-             | Pair (String, String)
+             | Label String
+             | NumInt Int
+             | NumFloat Float
+             | PairSym
     deriving Show
 
 }
