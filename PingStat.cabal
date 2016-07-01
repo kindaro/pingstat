@@ -1,6 +1,6 @@
 name:                PingStat
 version:             0.1.0.0
-synopsis:            Initial project template from stack
+synopsis:            Watch pings for a while and represent them in simple numeric form.
 description:         Please see README.md
 homepage:            https://github.com/kindaro/PingStat#readme
 license:             BSD3
