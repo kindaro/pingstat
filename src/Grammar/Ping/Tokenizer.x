@@ -1,5 +1,5 @@
 {
-module Grammar.Ping where
+module Grammar.Ping.Tokenizer where
 
 import Data.List
 
@@ -23,11 +23,11 @@ tokens :-
 
 {
 
-data Grammar = Blank
-             | Label String
-             | NumInt Int
-             | NumFloat Float
-             | PairSym
+data Vocabulary = Blank
+                | Label String
+                | NumInt Int
+                | NumFloat Float
+                | PairSym
     deriving Show
 
 }

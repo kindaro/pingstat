@@ -1,25 +1,53 @@
+{-# LANGUAGE
+    LambdaCase
+  #-}
+
 module Main where
 
-import GHC.IO.Handle
-import System.IO.Error
-import System.Process
-import Control.Exception
-import qualified Grammar.Ping as GP
+import              Control.Exception
+import              Control.Monad.Writer
+import              Data.Tuple.Select       (sel2)
+import              Data.Maybe              (fromJust)
+import              GHC.IO.Handle
+import              Grammar.Ping.Tokenizer
+-- import              Grammar.Ping.Grammatizer
+import              System.Environment
+import              System.IO
+import              System.IO.Error
+import              System.Process
 
 main :: IO ()
 main = do
-        (_, Just hout, _, _) <- createProcess
-            (proc "ping" [target, "-c", show (60)])
-            { std_out = CreatePipe }
-        printLoop hout
+        hSetBuffering stdout NoBuffering
+        >> getArgs >>= \case
+            ["lines"] -> do
+                createPingProcess >>= readLoop >>= sequence_.fmap (\x -> putStrLn x >> hFlush stdout)
 
-        where
-        printLoop handle =
-            try (putStrLn . show . GP.alexScanTokens =<< hGetLine handle)
-            >>= either
-                    (const $ return () :: IOException -> IO ())
-                    (const $ printLoop handle)
+            -- ["labels"] -> do
+            --     Just hout <- createPingProcess
+            --     readLoop hout >>= putStrLn . length
+
+
+createPingProcess = (fromJust . sel2) <$> createProcess
+    (proc "ping" [target, "-c", show 3]) { std_out = CreatePipe }
+
+readLoop :: Handle -> IO [String]
+readLoop handle =
+    hSetBuffering handle NoBuffering >>
+    hIsEOF handle >>= \case
+        True -> return []
+        False ->
+            (liftM2 (:)) 
+                ((try (hGetLine handle) :: IO (Either IOException String))
+                    >>=     (either
+                                (const $ return "Error!")
+                                (return . show . alexScanTokens)
+                            ))
+                (readLoop handle)
+
+copeWithError :: (Exception e, Show a) => Either e a -> String
+copeWithError = either (const "Error!") (show)
 
 target :: String
-target = "192.168.0.1"
+target = "8.8.4.4"
 
